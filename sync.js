@@ -280,7 +280,20 @@ module.exports._parse = parse;
 module.exports._scrub = scrub;
 
 if (require.main === module) {
-  (process.argv.includes("--check") ? check() : syncAll().then((r) => console.log(JSON.stringify(r, null, 1)))).then(() => process.exit(0), (e) => {
+  (process.argv.includes("--check")
+    ? check()
+    : syncAll().then((r) => {
+        console.log(JSON.stringify(r, null, 1));
+        const failed = r.filter((x) => x.error);
+        const added = r.reduce((n, x) => n + (x.added || 0), 0);
+        console.log(`\nSUMMARY: ${r.length} channels, ${added} new posts, ${failed.length} failed`);
+        // a failed channel makes the run RED (and GitHub emails you) instead of a misleading green check
+        if (failed.length) {
+          failed.forEach((x) => console.error(`FAILED ${x.c}: ${x.error}`));
+          process.exitCode = 1;
+        }
+      })
+  ).then(() => process.exit(), (e) => {
     console.error(e);
     process.exit(1);
   });
