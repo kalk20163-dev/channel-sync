@@ -15,7 +15,16 @@ const UA = "Mozilla/5.0 (compatible; ChannelSync/1.0)";
 
 const selfRef = /telegram|t\.me\b|\btg\b/i;
 // The channel list comes from the CHANNELS_JSON secret (so it is not visible in a public repo); channels.example.json is only a sample.
-const allChannels = () => JSON.parse(process.env.CHANNELS_JSON || "null") || require("./channels.example.json");
+const allChannels = () => {
+  const raw = (process.env.CHANNELS_JSON || "").trim();
+  if (!raw) {
+    console.log("CHANNELS_JSON is empty -> using the sample list (no real channels)");
+    return require("./channels.example.json");
+  }
+  const j = JSON.parse(raw);
+  console.log(`CHANNELS_JSON loaded: ${(j.channels || []).length} channels`);
+  return j;
+};
 const config = () => allChannels().channels.filter((c) => c.enabled !== false);
 
 let db = null;
