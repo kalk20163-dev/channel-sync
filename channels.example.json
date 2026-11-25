@@ -1,0 +1,10 @@
+{
+ "channels": [
+  {
+   "slug": "example",
+   "channel": "username_after_t.me",
+   "category": "news",
+   "enabled": false
+  }
+ ]
+}
